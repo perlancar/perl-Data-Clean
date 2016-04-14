@@ -1,0 +1,6 @@
+Revision history for Data-Clean
+
+0.33    2016-04-14 (PERLANCAR) (unreleased)
+
+	- First release, renamed from Data::Clean::Base and separated to its own
+          dist.
