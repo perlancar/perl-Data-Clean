@@ -153,13 +153,6 @@ sub _generate_cleanser_code {
         $add_new_if->("\$ref eq '$ref'", $act0);
     };
 
-    # recurse into hash- or array-based object if !recurse_obj option is true
-    if ($opts->{'!recurse_obj'}) {
-        # XXX optimize, avoid calling reftype() twice
-        $add_if->('$reftype eq "ARRAY"', '$process_array->({{var}})');
-        $add_if->('$reftype eq "HASH"' , '$process_hash->({{var}})');
-    }
-
     # catch object of specified classes (e.g. DateTime, etc)
     for my $on (grep {/\A\w*(::\w+)*\z/} sort keys %$opts) {
         my $o = $opts->{$on};
@@ -193,8 +186,14 @@ sub _generate_cleanser_code {
     }
 
     # recurse array and hash
-    $add_if_ref->("ARRAY", '$process_array->({{var}})');
-    $add_if_ref->("HASH" , '$process_hash->({{var}})');
+    if ($opts->{'!recurse_obj'}) {
+        $add_stmt->('stmt', 'my $reftype=Scalar::Util::reftype({{var}})//""');
+        $add_new_if->('$reftype eq "ARRAY"', '$process_array->({{var}})');
+        $add_if->('$reftype eq "HASH"' , '$process_hash->({{var}})');
+    } else {
+        $add_new_if_ref->("ARRAY", '$process_array->({{var}})');
+        $add_if_ref->("HASH" , '$process_hash->({{var}})');
+    }
 
     # lastly, catch any reference left
     for my $p ([-ref => '$ref']) {
@@ -203,7 +202,7 @@ sub _generate_cleanser_code {
         my $meth = "command_$o->[0]";
         die "Can't handle command $o->[0] for option '$p->[0]'" unless $self->can($meth);
         my @args = @$o; shift @args;
-        $add_if->($p->[1], $self->$meth(\@args));
+        $add_new_if->($p->[1], $self->$meth(\@args));
     }
 
     push @code, 'sub {'."\n";
@@ -215,21 +214,18 @@ sub _generate_cleanser_code {
     push @code, 'state $process_hash;'."\n";
     push @code, (
         'if (!$process_array) { $process_array = sub { my $a = shift; for my $e (@$a) { ',
-        'my $ref=ref($e);',
-        ($opts->{'!recurse_obj'} ? ' my $reftype=Scalar::Util::reftype($e)//"";':''), "\n",
+        'my $ref=ref($e);'."\n",
         join("", @stmts_ary).'} } }'."\n"
     );
     push @code, (
         'if (!$process_hash) { $process_hash = sub { my $h = shift; for my $k (keys %$h) { ',
-        'my $ref=ref($h->{$k});',
-        ($opts->{'!recurse_obj'} ? ' my $reftype=Scalar::Util::reftype($h->{$k})//"";':''), "\n",
+        'my $ref=ref($h->{$k});'."\n",
         join("", @stmts_hash).'} } }'."\n"
     );
     push @code, '%refs = (); $ctr_circ=0;'."\n" if $circ;
     push @code, (
         'for ($data) { ',
-        'my $ref=ref($_);',
-        ($opts->{'!recurse_obj'} ? ' my $reftype=Scalar::Util::reftype($_)//"";':''), "\n",
+        'my $ref=ref($_);'."\n",
         join("", @stmts_main).'}'."\n"
     );
     push @code, '$data'."\n";
