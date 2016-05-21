@@ -45,7 +45,7 @@ sub command_deref_scalar {
 
 sub command_stringify {
     my ($self, $args) = @_;
-    return '{{var}} = "{{var}}"';
+    return '{{var}} = "{{var}}"; $ref = ""';
 }
 
 sub command_replace_with_ref {
@@ -202,7 +202,7 @@ sub _generate_cleanser_code {
         my $meth = "command_$o->[0]";
         die "Can't handle command $o->[0] for option '$p->[0]'" unless $self->can($meth);
         my @args = @$o; shift @args;
-        $add_new_if->($p->[1], $self->$meth(\@args));
+        $add_if->($p->[1], $self->$meth(\@args));
     }
 
     push @code, 'sub {'."\n";
