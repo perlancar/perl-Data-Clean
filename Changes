@@ -1,5 +1,13 @@
 Revision history for Data-Clean
 
+0.35    2016-05-21 (PERLANCAR)
+
+        - [Bugfix] Recursing into object should be done after processing object
+          of specific class and -object (any object).
+
+        - [Bugfix] A couple more bug fixes.
+
+
 0.34    2016-05-21 (PERLANCAR)
 
 	- No functional changes.
