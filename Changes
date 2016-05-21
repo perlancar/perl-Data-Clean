@@ -1,5 +1,13 @@
 Revision history for Data-Clean
 
+0.34    2016-05-21 (PERLANCAR)
+
+	- No functional changes.
+
+	- [Bugfix][doc] Fix wrong documentation: !recurse_object should
+	  have been !recurse_obj.
+
+
 0.33    2016-04-14 (PERLANCAR)
 
 	- First release, renamed from Data::Clean::Base and separated to its own
