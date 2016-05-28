@@ -75,8 +75,7 @@ sub command_unbless {
         "if (!\$Data::Clean::_clone && $acme_damn_available) { ",
         "{{var}} = Acme::Damn::damn({{var}}) ",
         "} else { ",
-        "{{var}} = Function::Fallback::CoreOrPP::_unbless_fallback({{var}}) } ",
-        "\$ref = ref({{var}})",
+        "{{var}} = Function::Fallback::CoreOrPP::_unbless_fallback({{var}}); \$ref = ref({{var}}) }",
     );
 }
 
@@ -97,8 +96,7 @@ sub command_clone {
         "if (++\$ctr_circ <= $limit) { ",
         "{{var}} = $clone_func({{var}}); redo ",
         "} else { ",
-        "{{var}} = 'CIRCULAR' } ",
-        "\$ref = ref({{var}})",
+        "{{var}} = 'CIRCULAR'; \$ref = '' }",
     );
 }
 
