@@ -1,5 +1,11 @@
 Revision history for Data-Clean
 
+0.36    2016-05-28 (PERLANCAR)
+
+        - [Bugfix] Fix deep recursion problem by detecting circular reference
+          early, before other options.
+
+
 0.35    2016-05-21 (PERLANCAR)
 
         - [Bugfix] Recursing into object should be done after processing object
