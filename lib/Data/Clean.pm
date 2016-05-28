@@ -153,6 +153,17 @@ sub _generate_cleanser_code {
         $add_new_if->("\$ref eq '$ref'", $act0);
     };
 
+    # catch circular references
+    my $circ = $opts->{-circular};
+    if ($circ) {
+        my $meth = "command_$circ->[0]";
+        die "Can't handle command $circ->[0] for option '-circular'" unless $self->can($meth);
+        my @args = @$circ; shift @args;
+        my $act = $self->$meth(\@args);
+        #$add_stmt->('stmt', 'say "ref=$ref, " . {{var}}'); # DEBUG
+        $add_new_if->('$ref && $refs{ {{var}} }++', $act);
+    }
+
     # catch object of specified classes (e.g. DateTime, etc)
     for my $on (grep {/\A\w*(::\w+)*\z/} sort keys %$opts) {
         my $o = $opts->{$on};
@@ -172,17 +183,6 @@ sub _generate_cleanser_code {
         die "Can't handle command $o->[0] for option '$p->[0]'" unless $self->can($meth);
         my @args = @$o; shift @args;
         $add_if->($p->[1], $self->$meth(\@args));
-    }
-
-    # catch circular references
-    my $circ = $opts->{-circular};
-    if ($circ) {
-        my $meth = "command_$circ->[0]";
-        die "Can't handle command $circ->[0] for option '-circular'" unless $self->can($meth);
-        my @args = @$circ; shift @args;
-        my $act = $self->$meth(\@args);
-        #$add_stmt->('stmt', 'say "ref=$ref, " . {{var}}'); # DEBUG
-        $add_if->('$ref && $refs{ {{var}} }++', $act);
     }
 
     # recurse array and hash
