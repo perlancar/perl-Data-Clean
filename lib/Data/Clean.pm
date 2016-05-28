@@ -65,9 +65,9 @@ sub command_unbless {
 
     # Data::Clone by default does not clone objects, so Acme::Damn can modify
     # the original object despite the use of clone(), so we need to know whether
-    # user runs clone_and_clean() or clean_in_place() and avoid the use of
-    # Acme::Damn for the former case. this workaround will be unnecessary when
-    # Data::Clone clones objects.
+    # user runs clone_and_clean() ($Data::Clean::_clone is true) or
+    # clean_in_place() and avoid the use of Acme::Damn for the former case. this
+    # workaround will be unnecessary when Data::Clone clones objects.
 
     my $acme_damn_available = eval { require Acme::Damn; 1 } ? 1:0;
     return join(
