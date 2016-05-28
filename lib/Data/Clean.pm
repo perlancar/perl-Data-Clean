@@ -75,7 +75,9 @@ sub command_unbless {
         "if (!\$Data::Clean::_clone && $acme_damn_available) { ",
         "{{var}} = Acme::Damn::damn({{var}}) ",
         "} else { ",
-        "{{var}} = Function::Fallback::CoreOrPP::_unbless_fallback({{var}}); \$ref = ref({{var}}) }",
+        "{{var}} = Function::Fallback::CoreOrPP::_unbless_fallback({{var}}) ",
+        "} ",
+        "\$ref = ref({{var}})",
     );
 }
 
