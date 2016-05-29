@@ -81,6 +81,13 @@ sub command_unbless {
     );
 }
 
+# for testing only
+sub command_unbless_pp {
+    my ($self, $args) = @_;
+
+    "{{var}} = Function::Fallback::CoreOrPP::_unbless_fallback({{var}}); \$ref = ref({{var}})";
+}
+
 sub command_clone {
     my $clone_func;
     eval { require Data::Clone };
