@@ -1,5 +1,10 @@
 Revision history for Data-Clean
 
+0.37    2016-05-31 (PERLANCAR)
+
+        - Replace circular test with another one which is not failing [CT].
+
+
 0.36    2016-05-28 (PERLANCAR)
 
         - [Bugfix] Fix deep recursion problem by detecting circular reference
