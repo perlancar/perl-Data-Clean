@@ -54,15 +54,6 @@ subtest "selector: -circular, command: clone" => sub {
     $c = Data::Clean->new(-circular => ['clone', 2]);
     $cdata = $c->clone_and_clean($data);
     is_deeply($cdata, [1, [1, [1, 'CIRCULAR']]], 'limit 2');
-
-    # when an object is turned into a non-ref by a command, it should not be
-    # counted as reference anymore. this behaviour is new in > 0.22
-    $c = Data::Clean->new(-circular => ['clone', 1], Foo=>['replace_with_ref']);
-    my $foo_obj = bless([], "Foo");
-    $cdata = $c->clone_and_clean([$foo_obj, $foo_obj, $foo_obj]);
-    is_deeply($cdata, ["Foo", "CIRCULAR", "CIRCULAR"],
-              'object turned into non-ref not counted into clone limit')
-        or diag explain $cdata;
 };
 
 subtest "selector: ''" => sub {
