@@ -1,5 +1,11 @@
 Revision history for Data-Clean
 
+0.38    2016-12-26 (PERLANCAR)
+
+	- Downgrade String::LineNumber and String::PerlQuote from
+	  RuntimeRequires to RuntimeSuggests, embed these modules.
+
+
 0.37    2016-05-31 (PERLANCAR)
 
         - Replace circular test with another one which is not failing [CT].
