@@ -1,5 +1,12 @@
 Revision history for Data-Clean
 
+0.42    2016-12-28 (PERLANCAR)
+
+	- No functional changes.
+
+	- [dist] Fix expressing embed prereq relationship with x_embed.
+
+
 0.41    2016-12-27 (PERLANCAR)
 
 	- No functional changes.
