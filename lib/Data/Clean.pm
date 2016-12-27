@@ -11,74 +11,10 @@ use Log::Any::IfLOG '$log';
 use Function::Fallback::CoreOrPP qw(clone);
 use Scalar::Util qw();
 
-# BEGIN EMBEDDING MODULE: mod=String::PerlQuote ver=0.02 generator="App::GenModEmbedder 0.003" generated-at="Mon Dec 26 09:44:03 2016"
-unless (eval { require String::PerlQuote; 1 }) {
-    my $source = '##line ' . (__LINE__+1) . ' "' . __FILE__ . qq("\n) . <<'EOS';
-#package String::PerlQuote;
-#
-#our $DATE = '2016-10-07';
-#our $VERSION = '0.02';
-#
-#use 5.010001;
-#use strict;
-#use warnings;
-#
-#use Exporter;
-#our @ISA = qw(Exporter);
-#our @EXPORT_OK = qw(
-#                       single_quote
-#                       double_quote
-#               );
-#
-#
-#my %esc = (
-#    "\a" => "\\a",
-#    "\b" => "\\b",
-#    "\t" => "\\t",
-#    "\n" => "\\n",
-#    "\f" => "\\f",
-#    "\r" => "\\r",
-#    "\e" => "\\e",
-#);
-#
-#
-#sub double_quote {
-#  local($_) = $_[0];
-#
-#  s/([\\\"\@\$])/\\$1/g;
-#  return qq("$_") unless /[^\040-\176]/;
-#
-#  s/([\a\b\t\n\f\r\e])/$esc{$1}/g;
-#
-#
-#  s/([\0-\037])(?!\d)/sprintf('\\%o',ord($1))/eg;
-#
-#  s/([\0-\037\177-\377])/sprintf('\\x%02X',ord($1))/eg;
-#  s/([^\040-\176])/sprintf('\\x{%X}',ord($1))/eg;
-#
-#  return qq("$_");
-#}
-#
-#
-#sub single_quote {
-#  local($_) = $_[0];
-#  s/([\\'])/\\$1/g;
-#  return qq('$_');
-#}
-#1;
-#
-#
-#__END__
-EOS
-    $source =~ s/^#//gm;
-    eval $source; die if $@;
-    $INC{'String/PerlQuote.pm'} = '(set by embedding code in '.__FILE__.')';
-}
-# END EMBEDDING MODULE
-
-# BEGIN EMBEDDING MODULE: mod=String::LineNumber ver=0.01 generator="App::GenModEmbedder 0.003" generated-at="Mon Dec 26 09:44:10 2016"
-unless (eval { require String::LineNumber; 1 }) {
-    my $source = '##line ' . (__LINE__+1) . ' "' . __FILE__ . qq("\n) . <<'EOS';
+# BEGIN FATPACK CODE
+{
+    no strict 'refs';
+    $main::fatpacked{"String/LineNumber.pm"} = '##line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'STRING_LINENUMBER';
 #package String::LineNumber;
 #
 #our $DATE = '2014-12-10';
@@ -117,14 +53,69 @@ unless (eval { require String::LineNumber; 1 }) {
 #
 #1;
 #
+#__END__
+#
+STRING_LINENUMBER
+
+    $main::fatpacked{"String/PerlQuote.pm"} = '##line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'STRING_PERLQUOTE';
+#package String::PerlQuote;
+#
+#our $DATE = '2016-10-07';
+#our $VERSION = '0.02';
+#
+#use 5.010001;
+#use strict;
+#use warnings;
+#
+#use Exporter;
+#our @ISA = qw(Exporter);
+#our @EXPORT_OK = qw(
+#                       single_quote
+#                       double_quote
+#               );
+#
+#my %esc = (
+#    "\a" => "\\a",
+#    "\b" => "\\b",
+#    "\t" => "\\t",
+#    "\n" => "\\n",
+#    "\f" => "\\f",
+#    "\r" => "\\r",
+#    "\e" => "\\e",
+#);
+#
+#sub double_quote {
+#  local($_) = $_[0];
+#  s/([\\\"\@\$])/\\$1/g;
+#  return qq("$_") unless /[^\040-\176]/;
+#
+#  s/([\a\b\t\n\f\r\e])/$esc{$1}/g;
+#
+#  s/([\0-\037])(?!\d)/sprintf('\\%o',ord($1))/eg;
+#
+#  s/([\0-\037\177-\377])/sprintf('\\x%02X',ord($1))/eg;
+#  s/([^\040-\176])/sprintf('\\x{%X}',ord($1))/eg;
+#
+#  return qq("$_");
+#}
+#
+#sub single_quote {
+#  local($_) = $_[0];
+#  s/([\\'])/\\$1/g;
+#  return qq('$_');
+#}
+#1;
 #
 #__END__
-EOS
-    $source =~ s/^#//gm;
-    eval $source; die if $@;
-    $INC{'String/LineNumber.pm'} = '(set by embedding code in '.__FILE__.')';
-}
-# END EMBEDDING MODULE
+#
+STRING_PERLQUOTE
+
+    $main::fatpacked{$_} =~ s/^\#//mg for ('String/LineNumber.pm', 'String/PerlQuote.pm');
+    my $class = 'FatPacked::'.(0+\%main::fatpacked);
+    if ($] < 5.008) { *{"${class}::INC"} = sub { if (my $fat = $_[0]{$_[1]}) { return sub { return 0 unless length $fat; $fat =~ s/^([^\n]*\n?)//; $_ = $1; return 1; }; } return; }; } else { *{"${class}::INC"} = sub { if (my $fat = $_[0]{$_[1]}) { open my $fh, '<', \$fat or die "FatPacker error loading $_[1] (could be a perl installation issue?)"; return $fh; } return; }; }
+    my $hook = bless(\%main::fatpacked, $class);
+    push @INC, $hook unless grep {ref($_) && "$_" eq "$hook"} @INC;
+} # END OF FATPACK CODE
 
 sub new {
     my ($class, %opts) = @_;
