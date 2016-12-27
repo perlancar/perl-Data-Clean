@@ -1,5 +1,12 @@
 Revision history for Data-Clean
 
+0.40    2016-12-27 (PERLANCAR)
+
+	- No functional changes.
+
+	- Standardize header & footer comment for embedded modules.
+
+
 0.39    2016-12-27 (PERLANCAR)
 
 	- No functional changes.
