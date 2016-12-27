@@ -1,5 +1,12 @@
 Revision history for Data-Clean
 
+0.41    2016-12-27 (PERLANCAR)
+
+	- No functional changes.
+
+	- [dist] Use _EMBED:: prefix to express embed relationship.
+
+
 0.40    2016-12-27 (PERLANCAR)
 
 	- No functional changes.
