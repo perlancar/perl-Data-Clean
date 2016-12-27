@@ -11,7 +11,7 @@ use Log::Any::IfLOG '$log';
 use Function::Fallback::CoreOrPP qw(clone);
 use Scalar::Util qw();
 
-# BEGIN FATPACK CODE
+# BEGIN FATPACK CODE: String/LineNumber.pm String/PerlQuote.pm
 {
     no strict 'refs';
     $main::fatpacked{"String/LineNumber.pm"} = '##line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'STRING_LINENUMBER';
@@ -115,7 +115,8 @@ STRING_PERLQUOTE
     if ($] < 5.008) { *{"${class}::INC"} = sub { if (my $fat = $_[0]{$_[1]}) { return sub { return 0 unless length $fat; $fat =~ s/^([^\n]*\n?)//; $_ = $1; return 1; }; } return; }; } else { *{"${class}::INC"} = sub { if (my $fat = $_[0]{$_[1]}) { open my $fh, '<', \$fat or die "FatPacker error loading $_[1] (could be a perl installation issue?)"; return $fh; } return; }; }
     my $hook = bless(\%main::fatpacked, $class);
     push @INC, $hook unless grep {ref($_) && "$_" eq "$hook"} @INC;
-} # END OF FATPACK CODE
+}
+# END OF FATPACK CODE
 
 sub new {
     my ($class, %opts) = @_;
