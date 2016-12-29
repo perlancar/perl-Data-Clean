@@ -17,8 +17,8 @@ use Scalar::Util qw();
     $main::fatpacked{"String/LineNumber.pm"} = '##line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'STRING_LINENUMBER';
 #package String::LineNumber;
 #
-#our $DATE = '2014-12-10';
-#our $VERSION = '0.01';
+#our $DATE = '2014-12-10'; 
+#our $VERSION = '0.01'; 
 #
 #use 5.010001;
 #use strict;
@@ -60,8 +60,8 @@ STRING_LINENUMBER
     $main::fatpacked{"String/PerlQuote.pm"} = '##line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'STRING_PERLQUOTE';
 #package String::PerlQuote;
 #
-#our $DATE = '2016-10-07';
-#our $VERSION = '0.02';
+#our $DATE = '2016-10-07'; 
+#our $VERSION = '0.02'; 
 #
 #use 5.010001;
 #use strict;
@@ -87,7 +87,7 @@ STRING_LINENUMBER
 #sub double_quote {
 #  local($_) = $_[0];
 #  s/([\\\"\@\$])/\\$1/g;
-#  return qq("$_") unless /[^\040-\176]/;
+#  return qq("$_") unless /[^\040-\176]/;  
 #
 #  s/([\a\b\t\n\f\r\e])/$esc{$1}/g;
 #
@@ -112,11 +112,12 @@ STRING_PERLQUOTE
 
     $main::fatpacked{$_} =~ s/^\#//mg for ('String/LineNumber.pm', 'String/PerlQuote.pm');
     my $class = 'FatPacked::'.(0+\%main::fatpacked);
-    if ($] < 5.008) { *{"${class}::INC"} = sub { if (my $fat = $_[0]{$_[1]}) { return sub { return 0 unless length $fat; $fat =~ s/^([^\n]*\n?)//; $_ = $1; return 1; }; } return; }; } else { *{"${class}::INC"} = sub { if (my $fat = $_[0]{$_[1]}) { open my $fh, '<', \$fat or die "FatPacker error loading $_[1] (could be a perl installation issue?)"; return $fh; } return; }; }
+    unless (defined &{"${class}::INC"}) { if ($] < 5.008) { *{"${class}::INC"} = sub { if (my $fat = $_[0]{$_[1]}) { return sub { return 0 unless length $fat; $fat =~ s/^([^\n]*\n?)//; $_ = $1; return 1; }; } return; }; } else { *{"${class}::INC"} = sub { if (my $fat = $_[0]{$_[1]}) { open my $fh, '<', \$fat or die "FatPacker error loading $_[1] (could be a perl installation issue?)"; return $fh; } return; }; } }
     my $hook = bless(\%main::fatpacked, $class);
     push @INC, $hook unless grep {ref($_) && "$_" eq "$hook"} @INC;
 }
 # END OF FATPACK CODE
+
 
 sub new {
     my ($class, %opts) = @_;
