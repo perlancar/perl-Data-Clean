@@ -226,16 +226,19 @@ EOC
 }
 
 sub command_clone {
+    my ($self, $args) = @_;
+
     my $clone_func;
-    eval { require Data::Clone };
-    if ($@) {
-        require Clone::PP;
-        $clone_func = "Clone::PP::clone";
-    } else {
-        $clone_func = "Data::Clone::clone";
+    unless ($clone_func = $self->{opts}{'!clone_func'}) {
+        eval { require Data::Clone };
+        if ($@) {
+            require Clone::PP;
+            $clone_func = "Clone::PP::clone";
+        } else {
+            $clone_func = "Data::Clone::clone";
+        }
     }
 
-    my ($self, $args) = @_;
     my $limit = $args->[0] // 1;
     return join(
         "",
