@@ -17,8 +17,8 @@ use Scalar::Util qw();
     $main::fatpacked{"String/LineNumber.pm"} = '##line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'STRING_LINENUMBER';
 #package String::LineNumber;
 #
-#our $DATE = '2014-12-10'; 
-#our $VERSION = '0.01'; 
+#our $DATE = '2014-12-10';
+#our $VERSION = '0.01';
 #
 #use 5.010001;
 #use strict;
@@ -60,8 +60,8 @@ STRING_LINENUMBER
     $main::fatpacked{"String/PerlQuote.pm"} = '##line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'STRING_PERLQUOTE';
 #package String::PerlQuote;
 #
-#our $DATE = '2016-10-07'; 
-#our $VERSION = '0.02'; 
+#our $DATE = '2016-10-07';
+#our $VERSION = '0.02';
 #
 #use 5.010001;
 #use strict;
@@ -87,7 +87,7 @@ STRING_LINENUMBER
 #sub double_quote {
 #  local($_) = $_[0];
 #  s/([\\\"\@\$])/\\$1/g;
-#  return qq("$_") unless /[^\040-\176]/;  
+#  return qq("$_") unless /[^\040-\176]/;
 #
 #  s/([\a\b\t\n\f\r\e])/$esc{$1}/g;
 #
@@ -196,6 +196,35 @@ sub command_unbless_pp {
     "{{var}} = Function::Fallback::CoreOrPP::_unbless_fallback({{var}}); \$ref = ref({{var}})";
 }
 
+sub command_unbless_ffc_inlined {
+    my ($self, $args) = @_;
+
+    # code taken from Function::Fallback::CoreOrPP 0.07
+    $self->{_subs}{unbless} //= <<'EOC';
+    my $ref = shift;
+
+    my $r = ref($ref);
+    # not a reference
+    return $ref unless $r;
+
+    # return if not a blessed ref
+    my ($r2, $r3) = "$ref" =~ /(.+)=(.+?)\(/
+        or return $ref;
+
+    if ($r3 eq 'HASH') {
+        return { %$ref };
+    } elsif ($r3 eq 'ARRAY') {
+        return [ @$ref ];
+    } elsif ($r3 eq 'SCALAR') {
+        return \( my $copy = ${$ref} );
+    } else {
+        die "Can't handle $ref";
+    }
+EOC
+
+    "{{var}} = \$sub_unbless->({{var}}); \$ref = ref({{var}})";
+}
+
 sub command_clone {
     my $clone_func;
     eval { require Data::Clone };
@@ -268,6 +297,8 @@ sub _generate_cleanser_code {
         $add_new_if->("\$ref eq '$ref'", $act0);
     };
 
+    $self->{_subs} = {};
+
     # catch circular references
     my $circ = $opts->{-circular};
     if ($circ) {
@@ -322,6 +353,9 @@ sub _generate_cleanser_code {
 
     push @code, 'sub {'."\n";
     push @code, 'require Scalar::Util;'."\n" if $opts->{'!recurse_obj'};
+    for (sort keys %{$self->{_subs}}) {
+        push @code, "state \$sub_$_ = sub { ".$self->{_subs}{$_}." };\n";
+    }
     push @code, 'my $data = shift;'."\n";
     push @code, 'state %refs;'."\n" if $circ;
     push @code, 'state $ctr_circ;'."\n" if $circ;
@@ -356,6 +390,8 @@ sub _generate_cleanser_code {
     }
     eval "\$self->{code} = $code";
     die "Can't generate code: $@" if $@;
+
+    delete $self->{_subs};
     $self->{src} = $code;
 }
 

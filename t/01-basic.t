@@ -111,6 +111,17 @@ subtest "circular: -obj=>unbless_pp + !recurse_obj & no Acme::Damn" => sub {
     }) or diag explain $cdata;
 };
 
+subtest "-obj=>unbless_ffc_inlined" => sub {
+    my $data = bless({foo=>1}, "Foo");
+
+    my $c = Data::Clean->new(
+        -obj => ['unbless_ffc_inlined'],
+    );
+    my $cdata = $c->clone_and_clean($data);
+    is_deeply($cdata, {foo=>1})
+        or diag explain $cdata;
+};
+
 
 # command: call_method is tested via json
 # command: one_or_zero is tested via json
