@@ -474,13 +474,25 @@ arguments.
 Note that arrayrefs and hashrefs are always walked into, so it's not trapped by
 C<-ref>.
 
-Option keys that start with C<!> are special: C<!recurse_obj> (bool) which can
-be set to true to to recurse into objects if they are hash- or array-based. By
-default objects are not recursed into. Note that if you enable this option,
+Default for C<%opts>: C<< -ref => 'stringify' >>.
+
+Option keys that start with C<!> are special:
+
+=over
+
+=item * !recurse_obj (bool)
+
+Can be set to true to to recurse into objects if they are hash- or array-based.
+By default objects are not recursed into. Note that if you enable this option,
 object options (like C<Foo::Bar> or C<-obj>) won't work for hash- and
 array-based objects because they will be recursed instead.
 
-Default for C<%opts>: C<< -ref => 'stringify' >>.
+=item * !clone_func (str)
+
+Set name of clone function to use. The default is to use C<Data::Clone::clone>
+if available, or fallback to C<Clone::PP::clone>.
+
+=back
 
 Available commands:
 

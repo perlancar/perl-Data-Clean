@@ -1,5 +1,12 @@
 Revision history for Data-Clean
 
+0.44    2017-01-03 (PERLANCAR)
+
+	- Add option: !clone_func.
+
+	- Add command: unbless_ffc_inlined.
+
+
 0.43    2016-12-29 (PERLANCAR)
 
 	- No functional changes.
