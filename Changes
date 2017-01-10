@@ -1,3 +1,10 @@
+0.45    2017-01-10 (PERLANCAR)
+
+	- Remove embedding of String::LineNumber & String::PerlQuote (I
+	  don't feel embedding is elegant or worth the hassle, we should
+	  fatpack/datapack only the scripts).
+
+
 0.44    2017-01-03 (PERLANCAR)
 
 	- Add option: !clone_func.
