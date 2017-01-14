@@ -8,8 +8,6 @@ use strict;
 use warnings;
 use Log::Any::IfLOG '$log';
 
-use Function::Fallback::CoreOrPP qw(clone);
-
 sub new {
     my ($class, %opts) = @_;
     my $self = bless {opts=>\%opts}, $class;
@@ -21,6 +19,12 @@ sub new {
         require $mod_pm;
     }
     $self->{code} = eval $cd->{src};
+    {
+        $self->{clone_func} = $cd->{clone_func};
+        last unless $cd->{clone_func} =~ /(.+)::(.+)/;
+        (my $mod_pm = "$1.pm") =~ s!::!/!g;
+        require $mod_pm;
+    }
     die "Can't generate code: $@" if $@;
 
     $self;
@@ -266,9 +270,10 @@ sub clean_in_place {
 }
 
 sub clone_and_clean {
+    no strict 'refs';
+
     my ($self, $data) = @_;
-    my $clone = clone($data);
-    local $Data::Clean::_clone = 1;
+    my $clone = &{$self->{clone_func}}($data);
     $self->clean_in_place($clone);
 }
 

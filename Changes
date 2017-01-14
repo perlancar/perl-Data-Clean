@@ -1,3 +1,23 @@
+0.46    2017-01-14 (PERLANCAR)
+
+	- [Internal] [Incompatible change] _generate_cleanser_code() now returns
+	  compilation data containing source code as well as required modules,
+	  etc. This gives more useful information for code generators e.g.
+	  Perinci::CmdLine::Inline.
+
+	- [Incompatible change] command_* methods now take $cd (compilation data
+	  structure) as the first argument to ease passing data between routines
+	  during generation of cleanser code.
+
+        - Remove use of Acme::Damn to simplify things. Acme::Damn modifies the
+	  original object while Data::Clone does not clone objects, so we needed
+	  to differentiate case of clone_and_clean vs clean_in_place. In the
+	  case of clone_and_clean() we also need to make sure we don't use
+	  Acme::Damn to avoid modifying the original object. We now always
+	  shallow clone object to unbless it, so we don't need this case
+	  differentiation.
+
+
 0.45    2017-01-10 (PERLANCAR)
 
 	- Remove embedding of String::LineNumber & String::PerlQuote (I
