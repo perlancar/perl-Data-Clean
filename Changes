@@ -1,3 +1,8 @@
+0.48    2017-01-14 (PERLANCAR)
+
+	- [Bugfix] Used the wrong variable to access !clone_func option.
+
+
 0.47    2017-01-14 (PERLANCAR)
 
 	- [Internal] [Incompatible change] Put compiled code in
