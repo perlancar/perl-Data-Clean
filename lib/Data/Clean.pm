@@ -14,7 +14,15 @@ sub new {
     my ($class, %opts) = @_;
     my $self = bless {opts=>\%opts}, $class;
     $log->tracef("Cleanser options: %s", \%opts);
-    $self->_generate_cleanser_code;
+
+    my $cd = $self->_generate_cleanser_code;
+    for my $mod (keys %{ $cd->{modules} }) {
+        (my $mod_pm = "$mod.pm") =~ s!::!/!g;
+        require $mod_pm;
+    }
+    $self->{code} = eval $cd->{src};
+    die "Can't generate code: $@" if $@;
+
     $self;
 }
 
@@ -160,8 +168,6 @@ sub _generate_cleanser_code {
         $add_new_if->("\$ref eq '$ref'", $act0);
     };
 
-    $self->{_subs} = {};
-
     # catch circular references
     my $circ = $opts->{-circular};
     if ($circ) {
@@ -215,9 +221,6 @@ sub _generate_cleanser_code {
     }
 
     push @code, 'sub {'."\n";
-    for (sort keys %{$self->{_subs}}) {
-        push @code, "state \$sub_$_ = sub { ".$self->{_subs}{$_}." };\n";
-    }
     push @code, 'my $data = shift;'."\n";
     push @code, 'state %refs;'."\n" if $circ;
     push @code, 'state $ctr_circ;'."\n" if $circ;
@@ -250,11 +253,10 @@ sub _generate_cleanser_code {
                      $ENV{LINENUM} // 1 ?
                          String::LineNumber::linenum($code) : $code);
     }
-    eval "\$self->{code} = $code";
-    die "Can't generate code: $@" if $@;
 
-    delete $self->{_subs};
-    $self->{src} = $code;
+    $cd->{src} = $code;
+
+    $cd;
 }
 
 sub clean_in_place {
