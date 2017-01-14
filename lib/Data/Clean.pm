@@ -10,7 +10,7 @@ use Log::Any::IfLOG '$log';
 
 sub new {
     my ($class, %opts) = @_;
-    my $self = bless {opts=>\%opts}, $class;
+    my $self = bless {_opts=>\%opts}, $class;
     $log->tracef("Cleanser options: %s", \%opts);
 
     my $cd = $self->_generate_cleanser_code;
@@ -106,14 +106,13 @@ sub command_die {
 
 sub _generate_cleanser_code {
     my $self = shift;
-    my $opts = $self->{opts};
+    my $opts = $self->{_opts};
 
     # compilation data, a structure that will be passed around between routines
     # during the generation of cleanser code.
     my $cd = {
         modules => {}, # key = module name, val = version
-        clone_func   => $self->{'!clone_func'},
-        unbless_func => $self->{'!unbless_func'},
+        clone_func   => $self->{_opts}{'!clone_func'},
         code => '',
     };
 
