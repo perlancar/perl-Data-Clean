@@ -18,9 +18,9 @@ sub new {
         (my $mod_pm = "$mod.pm") =~ s!::!/!g;
         require $mod_pm;
     }
-    $self->{code} = eval $cd->{src};
+    $self->{_cd} = $cd;
+    $self->{_code} = eval $cd->{src};
     {
-        $self->{clone_func} = $cd->{clone_func};
         last unless $cd->{clone_func} =~ /(.+)::(.+)/;
         (my $mod_pm = "$1.pm") =~ s!::!/!g;
         require $mod_pm;
@@ -266,14 +266,14 @@ sub _generate_cleanser_code {
 sub clean_in_place {
     my ($self, $data) = @_;
 
-    $self->{code}->($data);
+    $self->{_code}->($data);
 }
 
 sub clone_and_clean {
     no strict 'refs';
 
     my ($self, $data) = @_;
-    my $clone = &{$self->{clone_func}}($data);
+    my $clone = &{$self->{_cd}{clone_func}}($data);
     $self->clean_in_place($clone);
 }
 
