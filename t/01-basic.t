@@ -92,7 +92,7 @@ subtest "option: !recurse_obj" => sub {
 };
 
 # make sure we can catch circular references
-subtest "circular: -obj=>unbless_pp + !recurse_obj & no Acme::Damn" => sub {
+subtest "circular: -obj=>unbless + !recurse_obj & no Acme::Damn" => sub {
     my $tree = bless({id=>'n0', parent=>undef}, "TreeNode");
     my $n1   = bless({id=>'n1', parent=>$tree}, "TreeNode");
     my $n2   = bless({id=>'n2', parent=>$tree}, "TreeNode");
@@ -100,7 +100,7 @@ subtest "circular: -obj=>unbless_pp + !recurse_obj & no Acme::Damn" => sub {
 
     my $c = Data::Clean->new(
         -circular => ['replace_with_str', 'CIRCULAR'],
-        -obj => ['unbless_pp'],
+        -obj => ['unbless'],
         '!recurse_obj' => 1,
     );
     my $cdata = $c->clone_and_clean($tree);
@@ -110,18 +110,6 @@ subtest "circular: -obj=>unbless_pp + !recurse_obj & no Acme::Damn" => sub {
         children => [{id=>'n1', parent=>"CIRCULAR"}, {id=>'n2', parent=>"CIRCULAR"}],
     }) or diag explain $cdata;
 };
-
-subtest "-obj=>unbless_ffc_inlined" => sub {
-    my $data = bless({foo=>1}, "Foo");
-
-    my $c = Data::Clean->new(
-        -obj => ['unbless_ffc_inlined'],
-    );
-    my $cdata = $c->clone_and_clean($data);
-    is_deeply($cdata, {foo=>1})
-        or diag explain $cdata;
-};
-
 
 # command: call_method is tested via json
 # command: one_or_zero is tested via json

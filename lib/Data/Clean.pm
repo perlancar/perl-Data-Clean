@@ -9,7 +9,6 @@ use warnings;
 use Log::Any::IfLOG '$log';
 
 use Function::Fallback::CoreOrPP qw(clone);
-use Scalar::Util qw();
 
 sub new {
     my ($class, %opts) = @_;
@@ -20,122 +19,68 @@ sub new {
 }
 
 sub command_call_method {
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
     my $mn = $args->[0];
     die "Invalid method name syntax" unless $mn =~ /\A\w+\z/;
     return "{{var}} = {{var}}->$mn; \$ref = ref({{var}})";
 }
 
 sub command_call_func {
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
     my $fn = $args->[0];
     die "Invalid func name syntax" unless $fn =~ /\A\w+(::\w+)*\z/;
     return "{{var}} = $fn({{var}}); \$ref = ref({{var}})";
 }
 
 sub command_one_or_zero {
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
     return "{{var}} = {{var}} ? 1:0; \$ref = ''";
 }
 
 sub command_deref_scalar {
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
     return '{{var}} = ${ {{var}} }; $ref = ref({{var}})';
 }
 
 sub command_stringify {
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
     return '{{var}} = "{{var}}"; $ref = ""';
 }
 
 sub command_replace_with_ref {
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
     return '{{var}} = $ref; $ref = ""';
 }
 
 sub command_replace_with_str {
     require String::PerlQuote;
 
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
     return "{{var}} = ".String::PerlQuote::double_quote($args->[0]).'; $ref=""';
 }
 
 sub command_unbless {
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
 
-    # Data::Clone by default does not clone objects, so Acme::Damn can modify
-    # the original object despite the use of clone(), so we need to know whether
-    # user runs clone_and_clean() ($Data::Clean::_clone is true) or
-    # clean_in_place() and avoid the use of Acme::Damn for the former case. this
-    # workaround will be unnecessary when Data::Clone clones objects.
-
-    my $acme_damn_available = eval { require Acme::Damn; 1 } ? 1:0;
     return join(
         "",
-        "if (!\$Data::Clean::_clone && $acme_damn_available) { ",
-        "{{var}} = Acme::Damn::damn({{var}}) ",
-        "} else { ",
-        "{{var}} = Function::Fallback::CoreOrPP::_unbless_fallback({{var}}) ",
-        "} ",
-        "\$ref = ref({{var}})",
+        'my $reftype = Scalar::Util::reftype({{var}}); ',
+        '{{var}} = $reftype eq "HASH" ? {%{ {{var}} }} :',
+        ' $reftype eq "ARRAY" ? [@{ {{var}} }] :',
+        ' $reftype eq "SCALAR" ? \(my $copy = ${ {{var}} }) :',
+        ' $reftype eq "CODE" ? sub { goto &{ {{var}} } } :',
+        '(die "Cannot unbless object with type $ref")',
     );
 }
 
-# for testing only
-sub command_unbless_pp {
-    my ($self, $args) = @_;
-
-    "{{var}} = Function::Fallback::CoreOrPP::_unbless_fallback({{var}}); \$ref = ref({{var}})";
-}
-
-sub command_unbless_ffc_inlined {
-    my ($self, $args) = @_;
-
-    # code taken from Function::Fallback::CoreOrPP 0.07
-    $self->{_subs}{unbless} //= <<'EOC';
-    my $ref = shift;
-
-    my $r = ref($ref);
-    # not a reference
-    return $ref unless $r;
-
-    # return if not a blessed ref
-    my ($r2, $r3) = "$ref" =~ /(.+)=(.+?)\(/
-        or return $ref;
-
-    if ($r3 eq 'HASH') {
-        return { %$ref };
-    } elsif ($r3 eq 'ARRAY') {
-        return [ @$ref ];
-    } elsif ($r3 eq 'SCALAR') {
-        return \( my $copy = ${$ref} );
-    } else {
-        die "Can't handle $ref";
-    }
-EOC
-
-    "{{var}} = \$sub_unbless->({{var}}); \$ref = ref({{var}})";
-}
-
 sub command_clone {
-    my ($self, $args) = @_;
-
-    my $clone_func;
-    unless ($clone_func = $self->{opts}{'!clone_func'}) {
-        eval { require Data::Clone };
-        if ($@) {
-            require Clone::PP;
-            $clone_func = "Clone::PP::clone";
-        } else {
-            $clone_func = "Data::Clone::clone";
-        }
-    }
+    my ($self, $cd, $args) = @_;
 
     my $limit = $args->[0] // 1;
     return join(
         "",
         "if (++\$ctr_circ <= $limit) { ",
-        "{{var}} = $clone_func({{var}}); redo ",
+        "{{var}} = $cd->{clone_func}({{var}}); redo ",
         "} else { ",
         "{{var}} = 'CIRCULAR'; \$ref = '' }",
     );
@@ -143,13 +88,36 @@ sub command_clone {
 
 # test
 sub command_die {
-    my ($self, $args) = @_;
+    my ($self, $cd, $args) = @_;
     return "die";
 }
 
 sub _generate_cleanser_code {
     my $self = shift;
     my $opts = $self->{opts};
+
+    # compilation data, a structure that will be passed around between routines
+    # during the generation of cleanser code.
+    my $cd = {
+        modules => {}, # key = module name, val = version
+        clone_func   => $self->{'!clone_func'},
+        unbless_func => $self->{'!unbless_func'},
+        code => '',
+    };
+
+    $cd->{modules}{'Scalar::Util'} //= 0;
+
+    if (!$cd->{clone_func}) {
+        if (eval { require Data::Clone; 1 }) {
+            $cd->{clone_func} = 'Data::Clone::clone';
+        } else {
+            $cd->{clone_func} = 'Clone::PP::clone';
+        }
+    }
+    {
+        last unless $cd->{clone_func} =~ /(.+)::(.+)/;
+        $cd->{modules}{$1} //= 0;
+    }
 
     my (@code, @stmts_ary, @stmts_hash, @stmts_main);
 
@@ -200,7 +168,7 @@ sub _generate_cleanser_code {
         my $meth = "command_$circ->[0]";
         die "Can't handle command $circ->[0] for option '-circular'" unless $self->can($meth);
         my @args = @$circ; shift @args;
-        my $act = $self->$meth(\@args);
+        my $act = $self->$meth($cd, \@args);
         #$add_stmt->('stmt', 'say "ref=$ref, " . {{var}}'); # DEBUG
         $add_new_if->('$ref && $refs{ {{var}} }++', $act);
     }
@@ -212,7 +180,7 @@ sub _generate_cleanser_code {
         my $meth = "command_$o->[0]";
         die "Can't handle command $o->[0] for option '$on'" unless $self->can($meth);
         my @args = @$o; shift @args;
-        my $act = $self->$meth(\@args);
+        my $act = $self->$meth($cd, \@args);
         $add_if_ref->($on, $act);
     }
 
@@ -223,7 +191,7 @@ sub _generate_cleanser_code {
         my $meth = "command_$o->[0]";
         die "Can't handle command $o->[0] for option '$p->[0]'" unless $self->can($meth);
         my @args = @$o; shift @args;
-        $add_if->($p->[1], $self->$meth(\@args));
+        $add_if->($p->[1], $self->$meth($cd, \@args));
     }
 
     # recurse array and hash
@@ -243,11 +211,10 @@ sub _generate_cleanser_code {
         my $meth = "command_$o->[0]";
         die "Can't handle command $o->[0] for option '$p->[0]'" unless $self->can($meth);
         my @args = @$o; shift @args;
-        $add_if->($p->[1], $self->$meth(\@args));
+        $add_if->($p->[1], $self->$meth($cd, \@args));
     }
 
     push @code, 'sub {'."\n";
-    push @code, 'require Scalar::Util;'."\n" if $opts->{'!recurse_obj'};
     for (sort keys %{$self->{_subs}}) {
         push @code, "state \$sub_$_ = sub { ".$self->{_subs}{$_}." };\n";
     }
@@ -381,8 +348,8 @@ array-based objects because they will be recursed instead.
 
 =item * !clone_func (str)
 
-Set name of clone function to use. The default is to use C<Data::Clone::clone>
-if available, or fallback to C<Clone::PP::clone>.
+Set fully qualified name of clone function to use. The default is to use
+C<Data::Clone::clone> if available, or fallback to C<Clone::PP::clone>.
 
 =back
 
