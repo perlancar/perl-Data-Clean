@@ -1,3 +1,10 @@
+0.47    2017-01-14 (PERLANCAR)
+
+	- [Internal] [Incompatible change] Put compiled code in
+	  $self->{_code} instead of $self->{code}, put compilation data
+	  result in $self->{_cd}.
+
+
 0.46    2017-01-14 (PERLANCAR)
 
 	- [Internal] [Incompatible change] _generate_cleanser_code() now returns
