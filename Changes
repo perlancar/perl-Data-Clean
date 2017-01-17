@@ -29,6 +29,8 @@
 	  shallow clone object to unbless it, so we don't need this case
 	  differentiation.
 
+        - [Removed features] Remove commands: unbless_pp, unbless_ffc_inlined.
+
 
 0.45    2017-01-10 (PERLANCAR)
 
@@ -41,7 +43,7 @@
 
 	- Add option: !clone_func.
 
-	- Add command: unbless_ffc_inlined.
+	- Add command: unbless_ffc_inlined. UPDATE 2017-01-14: now removed.
 
 
 0.43    2016-12-29 (PERLANCAR)
