@@ -6,12 +6,12 @@ package Data::Clean;
 use 5.010001;
 use strict;
 use warnings;
-use Log::Any::IfLOG '$log';
+use Log::ger;
 
 sub new {
     my ($class, %opts) = @_;
     my $self = bless {_opts=>\%opts}, $class;
-    $log->tracef("Cleanser options: %s", \%opts);
+    log_trace("Cleanser options: %s", \%opts);
 
     my $cd = $self->_generate_cleanser_code;
     for my $mod (keys %{ $cd->{modules} }) {
@@ -252,7 +252,7 @@ sub _generate_cleanser_code {
 
     if ($ENV{LOG_CLEANSER_CODE} && $log->is_trace) {
         require String::LineNumber;
-        $log->tracef("Cleanser code:\n%s",
+        log_trace("Cleanser code:\n%s",
                      $ENV{LINENUM} // 1 ?
                          String::LineNumber::linenum($code) : $code);
     }
