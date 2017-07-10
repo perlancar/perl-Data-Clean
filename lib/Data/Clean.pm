@@ -250,7 +250,7 @@ sub _generate_cleanser_code {
 
     my $code = join("", @code).";";
 
-    if ($ENV{LOG_CLEANSER_CODE} && $log->is_trace) {
+    if ($ENV{LOG_CLEANSER_CODE} && log_is_trace()) {
         require String::LineNumber;
         log_trace("Cleanser code:\n%s",
                      $ENV{LINENUM} // 1 ?
