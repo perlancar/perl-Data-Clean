@@ -1,3 +1,11 @@
+0.501   2018-10-09 (PERLANCAR)
+
+	- No functional changes.
+
+	- [doc] Document that module specified in !clone_func will
+	  automatically be loaded.
+
+
 0.500   2018-10-09 (PERLANCAR)
 
 	- Replace Data::Clone with Sereal::Dclone because the former cannot
