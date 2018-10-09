@@ -358,6 +358,9 @@ array-based objects because they will be recursed instead.
 Set fully qualified name of clone function to use. The default is to use
 C<Sereal::Dclone::dclone> if available, or fallback to C<Clone::PP::clone>.
 
+The clone module (all but the last part of the C<!clone_func> value) will
+automatically be loaded using C<require()>.
+
 =back
 
 Available commands:
