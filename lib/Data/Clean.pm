@@ -119,12 +119,7 @@ sub _generate_cleanser_code {
     $cd->{modules}{'Scalar::Util'} //= 0;
 
     if (!$cd->{clone_func}) {
-        if (eval { require Sereal::Dclone; 1 }) {
-            $cd->{clone_func} = 'Sereal::Dclone::dclone';
-        } else {
-            # require Clone::PP; done by new()
-            $cd->{clone_func} = 'Clone::PP::clone';
-        }
+        $cd->{clone_func} = 'Clone::PP::clone';
     }
     {
         last unless $cd->{clone_func} =~ /(.+)::(.+)/;
@@ -356,7 +351,7 @@ array-based objects because they will be recursed instead.
 =item * !clone_func (str)
 
 Set fully qualified name of clone function to use. The default is to use
-C<Sereal::Dclone::dclone> if available, or fallback to C<Clone::PP::clone>.
+C<Clone::PP::clone>.
 
 The clone module (all but the last part of the C<!clone_func> value) will
 automatically be loaded using C<require()>.
