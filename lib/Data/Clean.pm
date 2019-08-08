@@ -309,7 +309,7 @@ sub clone_and_clean {
 This class can be used to process a data structure by replacing some forms of
 data items with other forms. One of the main uses is to clean "unsafe" data,
 e.g. clean a data structure so it can be encoded to JSON (see
-L<Data::Clean::JSON>, which is a thin wrapper over this class).
+L<Data::Clean::ForJSON>, which is a thin wrapper over this class).
 
 As can be seen from the example, you specify a list of transformations to be
 done, and then this class will generate an appropriate Perl code to do the
