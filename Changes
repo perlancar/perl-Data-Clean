@@ -1,3 +1,11 @@
+0.503   2019-08-08  Released-By: PERLANCAR; Urgency: low
+
+        - No functional changes.
+
+	- [doc] Update mention Data::Clean::JSON -> Data::Clean::ForJSON
+	  (renamed).
+
+
 0.502   2018-10-14  Released-By: PERLANCAR
 
 	- Revert the decision to use Sereal::Dclone because of problem with
