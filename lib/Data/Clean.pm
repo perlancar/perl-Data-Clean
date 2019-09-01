@@ -49,6 +49,11 @@ sub command_one_or_zero {
     return "{{var}} = {{var}} ? 1:0; \$ref = ''";
 }
 
+sub command_deref_scalar_one_or_zero {
+    my ($self, $cd, $args) = @_;
+    return "{{var}} = \${ {{var}} } ? 1:0; \$ref = ''";
+}
+
 sub command_deref_scalar {
     my ($self, $cd, $args) = @_;
     return '{{var}} = ${ {{var}} }; $ref = ref({{var}})';
@@ -388,6 +393,10 @@ as the replacement.
 =item * ['one_or_zero']
 
 This will perform C<< $val ? 1:0 >>.
+
+=item * ['deref_scalar_one_or_zero']
+
+This will perform C<< ${$val} ? 1:0 >>.
 
 =item * ['deref_scalar']
 
