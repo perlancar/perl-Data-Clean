@@ -1,3 +1,8 @@
+0.504   2019-09-01  Released-By: PERLANCAR; Urgency: medium
+
+	- Add command: deref_scalar_one_or_zero.
+
+
 0.503   2019-08-08  Released-By: PERLANCAR; Urgency: low
 
         - No functional changes.
