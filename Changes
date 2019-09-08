@@ -72,6 +72,8 @@
 	  differentiation.
 
         - [Removed features] Remove commands: unbless_pp, unbless_ffc_inlined.
+          UPDATE 2019-09-08: command unbless_ffc_inline re-added, we need this
+          to build Data-Clean-ForJSON-Pregen.
 
 
 0.45    2017-01-10  Released-By: PERLANCAR
@@ -86,6 +88,7 @@
 	- Add option: !clone_func.
 
 	- Add command: unbless_ffc_inlined. UPDATE 2017-01-14: now removed.
+          UPDATE 2019-09-08: re-added.
 
 
 0.43    2016-12-29  Released-By: PERLANCAR
