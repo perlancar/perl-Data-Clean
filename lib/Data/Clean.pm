@@ -503,7 +503,7 @@ Clean $data. Clone $data first.
 =item * LOG_CLEANSER_CODE => BOOL (default: 0)
 
 Can be enabled if you want to see the generated cleanser code. It is logged at
-level C<trace>.
+level C<trace> using L<Log::ger>.
 
 =item * LINENUM => BOOL (default: 1)
 
