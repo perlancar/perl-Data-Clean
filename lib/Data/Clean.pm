@@ -152,6 +152,7 @@ sub _generate_cleanser_code {
     };
 
     $cd->{modules}{'Scalar::Util'} //= 0;
+    $cd->{modules}{'Data::Dmp'} //= 0 if $opts->{'!debug'};
 
     if (!$cd->{clone_func}) {
         $cd->{clone_func} = 'Clone::PP::clone';
@@ -173,7 +174,7 @@ sub _generate_cleanser_code {
                  [\@stmts_main, '$_', 'main']) {
                 my $act  = $act0 ; $act  =~ s/\Q{{var}}\E/$_->[1]/g;
                 my $cond = $cond0; $cond =~ s/\Q{{var}}\E/$_->[1]/g;
-                #unless (@{ $_->[0] }) { push @{ $_->[0] }, '    say "D:'.$_->[2].' val=", '.$_->[1].', ", ref=$ref"; # DEBUG'."\n" }
+                if ($opts->{'!debug'}) { unless (@{ $_->[0] }) { push @{ $_->[0] }, '    print "DEBUG:'.$_->[2].' cleaner: val=", Data::Dmp::dmp_ellipsis('.$_->[1].'), ", ref=$ref\n"; '."\n" } }
                 push @{ $_->[0] }, "    ".($n && $which ne 'new_if' ? "els":"")."if ($cond) { $act }\n";
             }
             $n++;
@@ -209,7 +210,7 @@ sub _generate_cleanser_code {
         die "Can't handle command $circ->[0] for option '-circular'" unless $self->can($meth);
         my @args = @$circ; shift @args;
         my $act = $self->$meth($cd, \@args);
-        #$add_stmt->('stmt', 'say "ref=$ref, " . {{var}}'); # DEBUG
+        if ($opts->{'!debug'}) { $add_stmt->('stmt', 'print "DEBUG: main cleaner: ref=$ref, " . {{var}} . "\n"'); }
         $add_new_if->('$ref && $refs{ {{var}} }++', $act);
     }
 
@@ -281,6 +282,7 @@ sub _generate_cleanser_code {
         'my $ref=ref($_);'."\n",
         join("", @stmts_main).'}'."\n"
     );
+    push @code, 'print "DEBUG: main cleaner: result: ", Data::Dmp::dmp_ellipsis($data), "\n";'."\n" if $opts->{'!debug'};
     push @code, '$data'."\n";
     push @code, '}'."\n";
 
@@ -335,6 +337,12 @@ sub clone_and_clean {
 
      # specify how to deal with all other kinds of objects
      -obj           => ['unbless'],
+
+     # recurse into object
+     #'!recurse_obj'=> 1,
+
+     # generate cleaner with debugging messages
+     #'!debug'      => 1,
  );
 
  # to get cleansed data
@@ -395,6 +403,11 @@ C<Clone::PP::clone>.
 
 The clone module (all but the last part of the C<!clone_func> value) will
 automatically be loaded using C<require()>.
+
+=item * !debug (bool)
+
+If set to true, will generate code to print debugging messages. For debugging
+only.
 
 =back
 
