@@ -442,6 +442,10 @@ This will replace a scalar reference like \1 with 1.
 This will perform unblessing using L<Function::Fallback::CoreOrPP::unbless()>.
 Should be done only for objects (C<-obj>).
 
+=item * ['die']
+
+Die. Only for testing.
+
 =item * ['code', STR]
 
 This will replace with I<STR> treated as Perl code.
