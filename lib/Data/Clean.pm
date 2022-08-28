@@ -1,12 +1,14 @@
 package Data::Clean;
 
-# DATE
-# VERSION
-
 use 5.010001;
 use strict;
 use warnings;
 use Log::ger;
+
+# AUTHORITY
+# DATE
+# DIST
+# VERSION
 
 sub new {
     my ($class, %opts) = @_;
@@ -155,7 +157,8 @@ sub _generate_cleanser_code {
     $cd->{modules}{'Data::Dmp'} //= 0 if $opts->{'!debug'};
 
     if (!$cd->{clone_func}) {
-        $cd->{clone_func} = 'Clone::PP::clone';
+        $cd->{clone_func} = $ENV{PERL_DATA_CLEAN_CLONE_FUNC} //
+            'Clone::PP::clone';
     }
     {
         last unless $cd->{clone_func} =~ /(.+)::(.+)/;
@@ -398,7 +401,8 @@ array-based objects because they will be recursed instead.
 
 =item * !clone_func (str)
 
-Set fully qualified name of clone function to use. The default is to use
+Set fully qualified name of clone function to use. The default is to get the
+value of the environment C<PERL_DATA_CLEAN_CLONE_FUNC> or use the default
 C<Clone::PP::clone>.
 
 The clone module (all but the last part of the C<!clone_func> value) will
@@ -516,6 +520,10 @@ Clean $data. Clone $data first.
 =head1 ENVIRONMENT
 
 =over
+
+=item * PERL_DATA_CLEAN_CLONE_FUNC
+
+String. Set default for C<!clone_func> option.
 
 =item * LOG_CLEANSER_CODE => BOOL (default: 0)
 
