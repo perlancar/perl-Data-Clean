@@ -21,7 +21,7 @@ sub new {
         require $mod_pm;
     }
     $self->{_cd} = $cd;
-    $self->{_code} = eval $cd->{src};
+    $self->{_code} = eval $cd->{src}; ## no critic: BuiltinFunctions::ProhibitStringyEval
     {
         last unless $cd->{clone_func} =~ /(.+)::(.+)/;
         (my $mod_pm = "$1.pm") =~ s!::!/!g;
@@ -310,7 +310,7 @@ sub clean_in_place {
 }
 
 sub clone_and_clean {
-    no strict 'refs';
+    no strict 'refs'; ## no critic: TestingAndDebugging::ProhibitNoStrict
 
     my ($self, $data) = @_;
     my $clone = &{$self->{_cd}{clone_func}}($data);
